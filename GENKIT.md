@@ -11,9 +11,10 @@ This document provides guidelines for using the Genkit MCP server when building 
 - [ ] Store/Remember the returned guide for reference throughout the session
 
 ### Step 2: Gather Context (Every request)
-- [ ] If the request mentions specific Genkit features, run `lookup_genkit_docs` with:
-  - First call: Just the language to get the index
-  - Second call: Specific files from the index related to the user's request
+- [ ] If the request mentions specific Genkit features, use the documentation tools:
+  - `list_genkit_docs`: To see available topics
+  - `search_genkit_docs`: To find specific keywords
+  - `read_genkit_docs`: To read the actual content of relevant files
 - [ ] Review all documentation before formulating your response
 
 ### Step 3: Implementation
@@ -26,23 +27,27 @@ This document provides guidelines for using the Genkit MCP server when building 
 ## Genkit MCP Tools Reference
 
 - `get_usage_guide`: **REQUIRED** first step for any Genkit session. Returns the current usage patterns and best practices.
-- `lookup_genkit_docs`: **REQUIRED** for feature-specific information. Always check docs before implementing.
-- `list_flows`: Use before running any flow to verify flow names and signatures.
-- `run_flow`: Execute flows with proper input validation based on the flow schema.
-- `get_trace`: Debug flow executions using the traceId from run_flow.
+- `list_genkit_docs`: List available documentation files.
+- `search_genkit_docs`: Search documentation for specific terms.
+- `read_genkit_docs`: Read the content of specific documentation files. **REQUIRED** for feature-specific information.
+- `start_runtime`: Start the application runtime (e.g. `npm run dev`) to enable flow discovery and execution.
+- `list_flows`: Use before running any flow to verify flow names and signatures. Requires running runtime.
+- `run_flow`: Execute flows with proper input validation based on the flow schema. Requires running runtime.
+- `get_trace`: Debug flow executions using the traceId from run_flow. Requires running runtime.
+- `kill_runtime` / `restart_runtime`: Manage the runtime process.
 
 ## Implementation Rules
 
 1. **Documentation First**: Never implement Genkit code without first consulting the documentation tools.
-2. **Verify Before Acting**: Always check existing flows with `list_flows` before attempting to run them.
-3. **Use MCP Tools**: Prefer MCP tools over CLI commands when possible.
-4. **Long-Running Processes**: For commands like `genkit start`, provide the command for the user to run rather than executing it yourself.
+2. **Runtime Management**: Use `start_runtime` to run the application code so that flows can be discovered and executed.
+3. **Verify Before Acting**: Always check existing flows with `list_flows` before attempting to run them.
+4. **Use MCP Tools**: Prefer MCP tools over CLI commands when possible.
 
 ## Common Mistakes to Avoid
 
 - ❌ Writing Genkit code from memory without checking docs
 - ❌ Assuming API patterns without verification
-- ❌ Running `genkit start` command yourself
+- ❌ Running `genkit start` CLI command yourself (use `start_runtime` tool instead)
 - ❌ Running flows without first listing them
 - ❌ Using outdated syntax or deprecated features
 
@@ -51,8 +56,9 @@ This document provides guidelines for using the Genkit MCP server when building 
 When user asks: "Help me create a flow that uses Gemini"
 
 1. ✓ Run `get_usage_guide` (if not already done this session)
-2. ✓ Run `lookup_genkit_docs` for language index
-3. ✓ Run `lookup_genkit_docs` for flow creation and Gemini plugin docs
+2. ✓ Run `list_genkit_docs` or `search_genkit_docs` to find relevant topics
+3. ✓ Run `read_genkit_docs` for flow creation and Gemini plugin docs
 4. ✓ Implement the flow using verified syntax from docs
-5. ✓ Use `list_flows` to verify the flow was created
-6. ✓ Optionally use `run_flow` to test it
+5. ✓ Run `start_runtime` to ensure the app is running
+6. ✓ Use `list_flows` to verify the flow was created
+7. ✓ Optionally use `run_flow` to test it
